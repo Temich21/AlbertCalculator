@@ -18,10 +18,10 @@ public class AlbertCalculatorDataContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<Category> Category { get; set; }
-    public DbSet<Product> Product { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Product> Products { get; set; }
     public DbSet<ProductsCategories> ProductsCategories { get; set; }
-    public DbSet<Purchase> Purchase { get; set; }
+    public DbSet<Purchase> Purchases { get; set; }
     public DbSet<PurchaseProducts> PurchaseProducts { get; set; }
 
     }
