@@ -11,10 +11,13 @@ namespace AlbertCalculator.Models
         public Guid Id { get; set; }
 
         [Required]
+        public int Code { get; set; }
+
+        [Required]
         public required string Name { get; set; }
 
         [Required]
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         public virtual required ICollection<PurchaseProducts> PurchaseProducts { get; set; }
     }

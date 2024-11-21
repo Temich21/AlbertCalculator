@@ -14,6 +14,9 @@ namespace AlbertCalculator.Models
         public int Quantity { get; set; }
 
         [Required]
+        public double Discount { get; set; }
+
+        [Required]
         public Guid PurchaseId { get; set; }
 
         [ForeignKey("PurchaseId")]
