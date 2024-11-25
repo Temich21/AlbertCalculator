@@ -15,17 +15,17 @@ namespace AlbertCalculator.Repositories
 
         public async Task<User> CreateAsync(User user)
         {
-            await _context.Users.AddAsync(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<User> FindAsync(Guid userId)
+        public async Task<User?> FindAsync(Guid userId)
         {
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<User> FindByEmailAsync(string email)
+        public async Task<User?> FindByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }

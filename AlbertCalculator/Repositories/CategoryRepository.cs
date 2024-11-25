@@ -14,6 +14,54 @@ namespace AlbertCalculator.Repositories
             _context = context;
         }
 
+        public async Task<CategoryDto> CreateCategoryAsync(string name, Guid userId)
+        {
+            var customCategory = new CustomCategory{
+                Name = name,
+                UserId = userId,
+            };
+
+            _context.Categories.Add(customCategory);
+            await _context.SaveChangesAsync();
+
+            return new CategoryDto {
+                Id = customCategory.Id,
+                Name = name,
+                Expenses = 0
+            };
+        }
+
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto)
+        {
+            var category = await _context.Categories.FindAsync(categoryDto.Id);
+
+            if (category == null)
+            {
+                throw new Exception("Category doesn't exist.");
+            }
+
+            category.Name = categoryDto.Name;
+
+            await _context.SaveChangesAsync();
+
+            return categoryDto;
+        }
+
+        public async Task<Guid> DeleteCategoryAsync(Guid categoryId)
+        {
+            var category = await _context.Categories.FindAsync(categoryId);
+
+            if (category == null)
+            {
+                throw new Exception("Category doesn't exist.");
+            }
+
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+
+            return categoryId;
+        }
+
         public async Task<List<CategoryDto>> FindAllAsync(Guid userId)
         {
             return await _context.Categories.Where(c => c.UserId == userId || c.UserId == null)
@@ -89,5 +137,20 @@ namespace AlbertCalculator.Repositories
                 })
                 .ToListAsync();
         }
+
+        //public async Task<ProductsCategoriesDto> CreateConnection(ProductsCategoriesDto productsCategories)
+        //{
+        //    //Check category or product if exist???
+        //    _context.ProductsCategories.Add(productsCategories);
+        //}
+
+        //public async Task<ProductsCategoriesDto> DeleteConnectionAsync(ProductsCategoriesDto productsCategoriesDto)
+        //{
+        //    //Check category or product if exist???
+        //    _context.Categories.Remove(productsCategoriesDto.CategoryId);
+        //    await _context.SaveChangesAsync();
+
+        //    return productsCategoriesDto;
+        //}
     }
 }

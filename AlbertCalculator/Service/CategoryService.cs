@@ -1,5 +1,4 @@
 ﻿using AlbertCalculator.Dtos;
-using AlbertCalculator.Models;
 using AlbertCalculator.Repositories;
 namespace AlbertCalculator.Service
 {
@@ -22,5 +21,29 @@ namespace AlbertCalculator.Service
             return await _categoryRepository.FindOneAsync(categoryId, userId);
         }
 
+        public async Task<CategoryDto> CreateCategory(string name, Guid userId)
+        {
+            return await _categoryRepository.CreateCategoryAsync(name, userId);
+        }
+
+        public async Task<CategoryDto> UpdateCategory(CategoryDto categoryDto)
+        {
+            return await _categoryRepository.UpdateCategoryAsync(categoryDto);
+        }
+
+        public async Task<Guid> DeleteCategory(Guid categoryId)
+        {
+            return await _categoryRepository.DeleteCategoryAsync(categoryId);
+        }
+
+        //public async Task<ProductsCategoriesDto> CreateConnection(ProductsCategoriesDto productsCategoriesDto)
+        //{
+        //    return await _categoryRepository.CreateConnection(productsCategoriesDto);
+        //}
+
+        //public async Task<Guid> DeleteConnection(ProductsCategoriesDto productsCategoriesDto)
+        //{
+        //    return await _categoryRepository.DeleteConnectionAsync(productsCategoriesDto);
+        //}
     }
 }

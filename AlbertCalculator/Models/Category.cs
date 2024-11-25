@@ -25,7 +25,7 @@ namespace AlbertCalculator.Models
         public Guid? UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual required User User { get; set; }
+        public virtual User? User { get; set; }
     }
 
     public class CustomCategory : Category
