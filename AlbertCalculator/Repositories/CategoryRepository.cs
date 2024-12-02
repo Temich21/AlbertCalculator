@@ -147,7 +147,7 @@ namespace AlbertCalculator.Repositories
         //public async Task<ProductsCategoriesDto> DeleteConnectionAsync(ProductsCategoriesDto productsCategoriesDto)
         //{
         //    //Check category or product if exist???
-        //    _context.Categories.Remove(productsCategoriesDto.CategoryId);
+        //    _context.ProductsCategories.Remove(productsCategoriesDto.CategoryId);
         //    await _context.SaveChangesAsync();
 
         //    return productsCategoriesDto;

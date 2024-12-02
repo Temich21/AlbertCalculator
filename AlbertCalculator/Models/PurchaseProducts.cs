@@ -20,12 +20,12 @@ namespace AlbertCalculator.Models
         public Guid PurchaseId { get; set; }
 
         [ForeignKey("PurchaseId")]
-        public virtual required Purchase Purchase { get; set; }
+        public virtual Purchase Purchase { get; set; }
 
         [Required]
         public Guid ProductId { get; set; }
 
         [ForeignKey("ProductId")]
-        public virtual required Product Product { get; set; }
+        public virtual Product Product { get; set; }
     }
 }

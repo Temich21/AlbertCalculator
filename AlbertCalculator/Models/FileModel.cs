@@ -3,17 +3,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AlbertCalculator.Models
 {
-    public class File
+    public class FileModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
         [Required]
-        public string FileName { get; set; }
+        public required string FileName { get; set; }
 
         [Required]
-        public string Data { get; set; }
+        public required string Data { get; set; }
 
         [Required]
         public Guid PurchaseId { get; set; }

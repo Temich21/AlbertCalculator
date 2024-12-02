@@ -14,11 +14,14 @@ namespace AlbertCalculator.Models
         public DateTime Date { get; set; }
 
         [Required]
+        public string Name { get; set; }
+
+        [Required]
         public Guid UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual required User User { get; set; }
+        public virtual User User { get; set; }
 
-        public virtual required ICollection<PurchaseProducts> PurchaseProducts { get; set; }
+        public virtual ICollection<PurchaseProducts> PurchaseProducts { get; set; }
     }
 }

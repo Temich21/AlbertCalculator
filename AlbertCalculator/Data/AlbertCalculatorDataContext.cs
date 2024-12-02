@@ -22,6 +22,7 @@ public class AlbertCalculatorDataContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductsCategories> ProductsCategories { get; set; }
     public DbSet<Purchase> Purchases { get; set; }
+    public DbSet<FileModel> Files { get; set; }
     public DbSet<PurchaseProducts> PurchaseProducts { get; set; }
 
     }
