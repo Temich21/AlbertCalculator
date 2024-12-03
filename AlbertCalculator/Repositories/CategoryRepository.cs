@@ -138,19 +138,9 @@ namespace AlbertCalculator.Repositories
                 .ToListAsync();
         }
 
-        //public async Task<ProductsCategoriesDto> CreateConnection(ProductsCategoriesDto productsCategories)
-        //{
-        //    //Check category or product if exist???
-        //    _context.ProductsCategories.Add(productsCategories);
-        //}
-
-        //public async Task<ProductsCategoriesDto> DeleteConnectionAsync(ProductsCategoriesDto productsCategoriesDto)
-        //{
-        //    //Check category or product if exist???
-        //    _context.ProductsCategories.Remove(productsCategoriesDto.CategoryId);
-        //    await _context.SaveChangesAsync();
-
-        //    return productsCategoriesDto;
-        //}
+        public async Task<Category?> FindOneByIdAsync(Guid categoryId)
+        {
+            return await _context.Categories.FindAsync(categoryId);
+        }
     }
 }

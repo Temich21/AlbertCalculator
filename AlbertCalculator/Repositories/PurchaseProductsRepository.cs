@@ -1,5 +1,6 @@
 ﻿using AlbertCalculator.Data;
 using AlbertCalculator.Models;
+using AlbertCalculator.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace AlbertCalculator.Repositories
@@ -13,24 +14,43 @@ namespace AlbertCalculator.Repositories
             _context = context;
         }
 
-        public async Task<Guid> FindProductIdByCodeAsync(int code)
+        public async Task<List<PurchaseProducts>> CreatePurchaseProductsAsync(List<ParsedProduct> products, Purchase purchase)
         {
-            Product? product = await _context.Products.FirstOrDefaultAsync(p => p.Code == code);
+            // Collect product codes
+            List<int> productCodes = products.Select(p => p.Code).ToList();
 
-            return product == null ? throw new KeyNotFoundException($"Product {code} doesn't exist.") : product.Id;
-        }
+            // Find all product Ids in DB
+            Dictionary<int, Guid> productsFromDb = await _context.Products
+                .Where(p => productCodes.Contains(p.Code))
+                .ToDictionaryAsync(p => p.Code, p => p.Id);
 
-        public async Task CreatePurchaseProducts(List<PurchaseProducts> purchaseProductsList)
-        {
-            _context.PurchaseProducts.AddRange(purchaseProductsList);
+            // Create PurchaseProducts List
+            List<PurchaseProducts> productPurchases = products
+                .Where(p => productsFromDb.ContainsKey(p.Code))
+                .Select(p => new PurchaseProducts
+                {
+                    PurchaseId = purchase.Id,
+                    ProductId = productsFromDb[p.Code],
+                    Quantity = p.Quantity,
+                    Discount = p.Discount
+                })
+                .ToList();
+
+            // Add new records and save in DB
+            await _context.PurchaseProducts.AddRangeAsync(productPurchases);
             await _context.SaveChangesAsync();
+
+            return productPurchases;
         }
 
         public async Task DeletePurchaseProductsAsync(Guid purchaseId)
         {
-            List<PurchaseProducts> existingPurchaseProducts = await _context.PurchaseProducts.Where(pp => pp.PurchaseId == purchaseId).ToListAsync();
-            _context.PurchaseProducts.RemoveRange(existingPurchaseProducts);
+            // Search for existed PP contains purchaseId
+            List<PurchaseProducts> existingPurchaseProducts = await _context.PurchaseProducts
+                .Where(pp => pp.PurchaseId == purchaseId)
+                .ToListAsync();
 
+            _context.PurchaseProducts.RemoveRange(existingPurchaseProducts);
             await _context.SaveChangesAsync();
         }
     }

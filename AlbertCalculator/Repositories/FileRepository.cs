@@ -30,9 +30,7 @@ namespace AlbertCalculator.Repositories
 
         public async Task<FileModel?> FindFileAsync(Guid fileId)
         {
-            FileModel? file = await _context.Files.FindAsync(fileId);
-
-            return file == null ? throw new KeyNotFoundException($"File with ID {fileId} doesn't exist.") : file;
+            return await _context.Files.FindAsync(fileId);
         }
     }
 }

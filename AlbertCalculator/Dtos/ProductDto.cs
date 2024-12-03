@@ -6,4 +6,9 @@
         public required string Name { get; set; }
         public required decimal Expenses { get; set; }
     }
+
+    public class GetProductDto
+    {
+        public required string Name { get; set; }
+    }
 }

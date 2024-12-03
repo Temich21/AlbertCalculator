@@ -25,32 +25,13 @@ namespace AlbertCalculator.Service
             // Parse products from text
             List<ParsedProduct> products = ParsePurchase.ParseProducts(pdfText);
 
-            // Save purchase and file in DB
+            // Save purchase, file and pp in DB
             Purchase purchase = await _purchaseRepository.CreatePurchaseAsync(purchaseDto);
 
             await _fileRepository.CreateFileAsync(purchaseDto.File);
 
-            // Create and Save PurchaseProducts list
-            List<PurchaseProducts> productPurchases = [];
+            await _purchaseProductsRepository.CreatePurchaseProductsAsync(products, purchase);
 
-            foreach (ParsedProduct product in products)
-            {
-                Guid productId = await _purchaseProductsRepository.FindProductIdByCodeAsync(product.Code);
-
-                PurchaseProducts purchaseProduct = new PurchaseProducts
-                {
-                    PurchaseId = purchase.Id,
-                    ProductId = productId,
-                    Quantity = product.Quantity,
-                    Discount = product.Discount
-                };
-
-                productPurchases.Add(purchaseProduct);
-            }
-
-            await _purchaseProductsRepository.CreatePurchaseProducts(productPurchases);
-
-            // Не будет ли лучше создавать инстансы и потом уже сохранять?
             return purchaseDto;
         }
 
@@ -58,7 +39,8 @@ namespace AlbertCalculator.Service
         {
             Purchase purchase = await _purchaseRepository.UpdatePurchaseAsync(purchaseDto);
 
-            FileModel file = await _fileRepository.FindFileAsync(purchaseDto.File.Id);
+            FileModel? file = await _fileRepository.FindFileAsync(purchaseDto.File.Id) 
+                ?? throw new KeyNotFoundException($"File with ID {purchaseDto.File.Id} doesn't exist.");
 
             if (file.Data != purchaseDto.File.Data)
             {
@@ -70,30 +52,19 @@ namespace AlbertCalculator.Service
 
                 List<ParsedProduct> products = ParsePurchase.ParseProducts(pdfText);
 
-                List<PurchaseProducts> productPurchases = [];
-
-                foreach (ParsedProduct product in products)
-                {
-                    Guid productId = await _purchaseProductsRepository.FindProductIdByCodeAsync(product.Code);
-
-                    PurchaseProducts purchaseProduct = new PurchaseProducts
-                    {
-                        PurchaseId = purchase.Id,
-                        ProductId = productId,
-                        Quantity = product.Quantity,
-                        Discount = product.Discount
-                    };
-
-                    productPurchases.Add(purchaseProduct);
-                }
-
-                await _purchaseProductsRepository.CreatePurchaseProducts(productPurchases);
+                // Save pp in DB
+                await _purchaseProductsRepository.CreatePurchaseProductsAsync(products, purchase);
             }
 
             return purchaseDto;
         }
 
+        public async Task DeletePurchase(Guid purchaseId)
+        {
+            Purchase? purchase = await _purchaseRepository.FindOneByIdAsync(purchaseId) 
+                ?? throw new KeyNotFoundException($"Purchase with ID {purchaseId} doesn't exist.");
 
-
+            await _purchaseRepository.DeletePurchaseAsync(purchase);
+        }
     }
 }

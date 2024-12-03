@@ -56,20 +56,20 @@ namespace AlbertCalculator.Controllers
             return Ok();
         }
 
-        //[HttpPost("connection")]
-        //public async Task<ActionResult<ProductsCategoriesDto>> CreateConnection([FromBody] ProductsCategoriesDto productsCategoriesDto)
-        //{
-        //    var result = await _categoryService.CreateConnection(productsCategoriesDto);
+        [HttpPost("connection")]
+        public async Task<ActionResult<ProductsCategoriesDto>> CreateConnection([FromBody] ProductsCategories productsCategories)
+        {
+            var result = await _categoryService.CreateConnection(productsCategories);
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //[HttpDelete("connection")]
-        //public async Task<ActionResult<CategoryDto>> DeleteConnection([FromBody] ProductsCategoriesDto productsCategoriesDto)
-        //{
-        //    await _categoryService.DeleteConnection(productsCategoriesDto);
+        [HttpDelete("connection")]
+        public async Task<ActionResult<string>> DeleteConnection([FromBody] ProductsCategories productsCategories)
+        {
+            await _categoryService.DeleteConnection(productsCategories);
 
-        //    return Ok();
-        //}
+            return Ok("Category was removed successfully");
+        }
     }
 }

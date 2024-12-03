@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AlbertCalculator.Dtos;
 using AlbertCalculator.Service;
+using AlbertCalculator.Models;
 
 namespace AlbertCalculator.Controllers
 {
@@ -29,6 +30,14 @@ namespace AlbertCalculator.Controllers
             var result = await _purchaseService.UpdatePurchase(purchaseDto);
 
             return Ok(result);
+        }
+
+        [HttpDelete("{purchaseId}")]
+        public async Task<ActionResult<string>> DeletePurchase(Guid purchaseId)
+        {
+            await _purchaseService.DeletePurchase(purchaseId);
+
+            return Ok("Purchase was Deleted successfully");
         }
     }
 }

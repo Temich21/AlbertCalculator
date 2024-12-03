@@ -15,7 +15,8 @@ namespace AlbertCalculator.Repositories
 
         public async Task<Purchase> CreatePurchaseAsync(PurchaseDto purchaseDto)
         {
-            Purchase newPurchase = new Purchase{
+            Purchase newPurchase = new()
+            {
                 Id = purchaseDto.Id,
                 Date = DateTime.Parse(purchaseDto.Date),
                 Name = purchaseDto.Name,
@@ -30,7 +31,7 @@ namespace AlbertCalculator.Repositories
 
         public async Task<Purchase> UpdatePurchaseAsync(PurchaseDto purchaseDto)
         {
-            Purchase updatePurchase = new Purchase
+            Purchase updatePurchase = new()
             {
                 Id = purchaseDto.Id,
                 Date = DateTime.Parse(purchaseDto.Date),
@@ -42,6 +43,17 @@ namespace AlbertCalculator.Repositories
             await _context.SaveChangesAsync();
 
             return updatePurchase;
+        }
+
+        public async Task DeletePurchaseAsync(Purchase purchase)
+        {
+            _context.Purchases.Remove(purchase);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Purchase?> FindOneByIdAsync(Guid purchaseId)
+        {
+            return await _context.Purchases.FindAsync(purchaseId);
         }
     }
 }

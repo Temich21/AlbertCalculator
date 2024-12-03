@@ -1,14 +1,19 @@
 ﻿using AlbertCalculator.Dtos;
+using AlbertCalculator.Models;
 using AlbertCalculator.Repositories;
 namespace AlbertCalculator.Service
 {
     public class CategoryService
     {
         private readonly CategoryRepository _categoryRepository;
+        private readonly ProductRepository _productRepository;
+        private readonly ProductsCategoriesRepository _productsCategoriesRepository;
 
-        public CategoryService(CategoryRepository categoryRepository)
+        public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository, ProductsCategoriesRepository productsCategoriesRepository)
         {
             _categoryRepository = categoryRepository;
+            _productRepository = productRepository;
+            _productsCategoriesRepository = productsCategoriesRepository;
         }
 
         public async Task<List<CategoryDto>> FindAll(Guid userId)
@@ -36,14 +41,26 @@ namespace AlbertCalculator.Service
             return await _categoryRepository.DeleteCategoryAsync(categoryId);
         }
 
-        //public async Task<ProductsCategoriesDto> CreateConnection(ProductsCategoriesDto productsCategoriesDto)
-        //{
-        //    return await _categoryRepository.CreateConnection(productsCategoriesDto);
-        //}
+        public async Task<ProductsCategories> CreateConnection(ProductsCategories productsCategories)
+        {
+            Category? category = await _categoryRepository.FindOneByIdAsync(productsCategories.CategoryId) 
+                ?? throw new KeyNotFoundException($"Category with ID {productsCategories.CategoryId} doesn't exist.");
 
-        //public async Task<Guid> DeleteConnection(ProductsCategoriesDto productsCategoriesDto)
-        //{
-        //    return await _categoryRepository.DeleteConnectionAsync(productsCategoriesDto);
-        //}
+            Product? product = await _productRepository.FindOneByIdAsync(productsCategories.ProductId)
+                ?? throw new KeyNotFoundException($"Product with ID {productsCategories.ProductId} doesn't exist.");
+
+            return await _productsCategoriesRepository.CreateConnectionAsync(productsCategories);
+        }
+
+        public async Task DeleteConnection(ProductsCategories productsCategories)
+        {
+            Category? category = await _categoryRepository.FindOneByIdAsync(productsCategories.CategoryId)
+                ?? throw new KeyNotFoundException($"Category with ID {productsCategories.CategoryId} doesn't exist.");
+
+            Product? product = await _productRepository.FindOneByIdAsync(productsCategories.ProductId)
+                ?? throw new KeyNotFoundException($"Product with ID {productsCategories.ProductId} doesn't exist.");
+
+            await _productsCategoriesRepository.DeleteConnectionAsync(productsCategories);
+        }
     }
 }
