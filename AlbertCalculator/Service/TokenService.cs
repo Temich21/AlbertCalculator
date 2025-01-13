@@ -20,17 +20,17 @@ namespace AlbertCalculator.Service
 
         public (string AccessToken, string RefreshToken) GenerateTokens(User user)
         {
-            // Генерация Access Token
+            // Access Token Generation
             var accessToken = new JwtBuilder()
-                .WithAlgorithm(new HMACSHA256Algorithm()) // Алгоритм шифрования
-                .WithSecret(GetAccessSecret())                 // Секретный ключ
-                .AddClaim("exp", DateTimeOffset.UtcNow.AddMinutes(GetAccessTokenTime()).ToUnixTimeSeconds()) // Время жизни токена
-                .AddClaim("id", user.Id.ToString())        // Данные пользователя
+                .WithAlgorithm(new HMACSHA256Algorithm()) // Encryption algorithm
+                .WithSecret(GetAccessSecret())                 // Secret key
+                .AddClaim("exp", DateTimeOffset.UtcNow.AddMinutes(GetAccessTokenTime()).ToUnixTimeSeconds()) // Token lifetime
+                .AddClaim("id", user.Id.ToString())        // User Data
                 .AddClaim("name", user.Name)
                 .AddClaim("email", user.Email)
-                .Encode(); // Генерируем токен
+                .Encode(); // Generate token
 
-            // Генерация Refresh Token
+            // Refresh Token Generation
             var refreshToken = new JwtBuilder()
                 .WithAlgorithm(new HMACSHA256Algorithm())
                 .WithSecret(GetRefreshSecret())
