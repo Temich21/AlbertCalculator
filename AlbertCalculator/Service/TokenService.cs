@@ -2,10 +2,10 @@
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
-using AlbertCalculator.Data;
+using JWT.Serializers;
+using Newtonsoft.Json;
 using AlbertCalculator.Models;
-using Microsoft.Extensions.Configuration;
-using System;
+using AlbertCalculator.Dtos;
 
 namespace AlbertCalculator.Service
 {
@@ -21,7 +21,7 @@ namespace AlbertCalculator.Service
         public (string AccessToken, string RefreshToken) GenerateTokens(User user)
         {
             // Access Token Generation
-            var accessToken = new JwtBuilder()
+            string accessToken = new JwtBuilder()
                 .WithAlgorithm(new HMACSHA256Algorithm()) // Encryption algorithm
                 .WithSecret(GetAccessSecret())                 // Secret key
                 .AddClaim("exp", DateTimeOffset.UtcNow.AddMinutes(GetAccessTokenTime()).ToUnixTimeSeconds()) // Token lifetime
@@ -31,26 +31,61 @@ namespace AlbertCalculator.Service
                 .Encode(); // Generate token
 
             // Refresh Token Generation
-            var refreshToken = new JwtBuilder()
+            string refreshToken = new JwtBuilder()
                 .WithAlgorithm(new HMACSHA256Algorithm())
                 .WithSecret(GetRefreshSecret())
                 .AddClaim("exp", DateTimeOffset.UtcNow.AddMinutes(GetRefreshTokenTime()).ToUnixTimeSeconds())
                 .AddClaim("id", user.Id.ToString())
+                .AddClaim("name", user.Name)
+                .AddClaim("email", user.Email)
                 .Encode();
 
             return (accessToken, refreshToken);
         }
 
-        public string ValidateRefresh(string refreshToken)
+        public UserDto ValidateRefresh(string refreshToken)
         {
             try
             {
-                var payload = new JwtBuilder()
+                string payload = new JwtBuilder()
+                    .WithAlgorithm(new HMACSHA256Algorithm())
                     .WithSecret(GetRefreshSecret())
+                    .WithJsonSerializer(new JsonNetSerializer())
+                    .WithValidator(new JwtValidator(new JsonNetSerializer(), new UtcDateTimeProvider()))
+                    .WithUrlEncoder(new JwtBase64UrlEncoder())
                     .MustVerifySignature()
-                    .Decode(refreshToken); 
+                    .Decode(refreshToken);
 
-                return payload;
+                UserDto userDto = JsonConvert.DeserializeObject<UserDto>(payload);
+
+                return userDto;
+            }
+            catch (TokenExpiredException)
+            {
+                throw new Exception("Token has expired");
+            }
+            catch (SignatureVerificationException)
+            {
+                throw new Exception("Invalid token signature");
+            }
+        }
+
+        public UserDto ValidateAccessToken(string accessToken)
+        {
+            try
+            {
+                string payload = new JwtBuilder()
+                    .WithAlgorithm(new HMACSHA256Algorithm())
+                    .WithSecret(GetAccessSecret())
+                    .WithJsonSerializer(new JsonNetSerializer())
+                    .WithValidator(new JwtValidator(new JsonNetSerializer(), new UtcDateTimeProvider()))
+                    .WithUrlEncoder(new JwtBase64UrlEncoder())
+                    .MustVerifySignature()
+                    .Decode(accessToken);
+
+                UserDto userDto = JsonConvert.DeserializeObject<UserDto>(payload);
+
+                return userDto;
             }
             catch (TokenExpiredException)
             {
@@ -64,22 +99,22 @@ namespace AlbertCalculator.Service
 
         private string GetAccessSecret()
         {
-            return _configuration["Jwt:AccessSecret"];
+            return _configuration["Jwt:AccessSecret"]!;
         }
 
         private int GetAccessTokenTime()
         {
-            return int.Parse(_configuration["Jwt:AccessTokenTime"]);
+            return int.Parse(_configuration["Jwt:AccessTokenTime"]!);
         }
 
         private string GetRefreshSecret()
         {
-            return _configuration["Jwt:RefreshSecret"];
+            return _configuration["Jwt:RefreshSecret"]!;
         }
 
         private int GetRefreshTokenTime()
         {
-            return int.Parse(_configuration["Jwt:RefreshTokenTime"]);
+            return int.Parse(_configuration["Jwt:RefreshTokenTime"]!);
         }
     }
 }

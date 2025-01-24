@@ -23,7 +23,7 @@ namespace AlbertCalculator.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _userService.SignupUserAsync(userDto);
+            AuthUserDto result = await _userService.SignupUserAsync(userDto);
 
             SetTokenCookies(result.RefreshToken);
 
@@ -38,7 +38,7 @@ namespace AlbertCalculator.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _userService.SigninUserAsync(userDto);
+            AuthUserDto result = await _userService.SigninUserAsync(userDto);
 
             SetTokenCookies(result.RefreshToken);
 
@@ -51,6 +51,23 @@ namespace AlbertCalculator.Controllers
              Response.Cookies.Delete("RefreshToken");
 
              return Ok(new { Message = "User logged out successfully" });
+        }
+
+        [HttpGet("refresh")]
+        public async Task<ActionResult<AuthUserDto>> RefreshUser()
+        {
+            string? refreshToken = Request.Cookies["RefreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized("Refresh token not found. Please login again.");
+            }
+
+            AuthUserDto result = await _userService.RefreshUserAsync(refreshToken);
+
+            SetTokenCookies(result.RefreshToken);
+
+            return Ok(result);
         }
 
         private void SetTokenCookies(string refreshToken)

@@ -21,8 +21,8 @@ namespace AlbertCalculator.Models
         [Required]
         public required string Password { get; set; }
 
-        public virtual required ICollection<Purchase> Purchases { get; set; }
+        public virtual ICollection<Purchase> Purchases { get; set; }
 
-        public virtual required ICollection<CustomCategory> CustomCategories { get; set; }
+        public virtual ICollection<CustomCategory> CustomCategories { get; set; }
     }
 }

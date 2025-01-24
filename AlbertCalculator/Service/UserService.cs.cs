@@ -16,7 +16,7 @@ namespace AlbertCalculator.Service
 
         public async Task<AuthUserDto> SignupUserAsync(UserDto userDto)
         {
-            var existingUser = await _userRepository.FindByEmailAsync(userDto.Email);
+            User? existingUser = await _userRepository.FindByEmailAsync(userDto.Email);
             if (existingUser != null)
             {
                 throw new Exception($"User with email {userDto.Email} already exist.");
@@ -27,19 +27,19 @@ namespace AlbertCalculator.Service
             var userCredations = new User
             {
                 Id = Guid.NewGuid(),
-                Name = userDto.Name,
+                Name = userDto.Name!,
                 Email = userDto.Email,
                 Password = passwordHash
             };
 
-            var user = await _userRepository.CreateAsync(userCredations);
+            User user = await _userRepository.CreateAsync(userCredations);
 
-            var tokens = _tokenService.GenerateTokens(user);
+            var (AccessToken, RefreshToken) = _tokenService.GenerateTokens(user);
 
             return new AuthUserDto
             {
-                AccessToken = tokens.AccessToken,
-                RefreshToken = tokens.RefreshToken,
+                AccessToken = AccessToken,
+                RefreshToken = RefreshToken,
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -51,24 +51,43 @@ namespace AlbertCalculator.Service
 
         public async Task<AuthUserDto> SigninUserAsync(UserDto userDto)
         {
-            var user = await _userRepository.FindByEmailAsync(userDto.Email);
-            if (user == null)
-            {
-                throw new Exception($"User with email {userDto.Email} doesn't exist.");
-            }
+            User? user = await _userRepository.FindByEmailAsync(userDto.Email)
+                ?? throw new Exception($"User with email {userDto.Email} doesn't exist.");
 
-            var isPasswordCorrect = BCrypt.Net.BCrypt.EnhancedVerify(userDto.Password, user.Password);
+            Boolean isPasswordCorrect = BCrypt.Net.BCrypt.EnhancedVerify(userDto.Password, user.Password);
             if (!isPasswordCorrect)
             {
                 throw new Exception("Incorrect password.");
             }
 
-            var tokens = _tokenService.GenerateTokens(user);
+            var (AccessToken, RefreshToken) = _tokenService.GenerateTokens(user);
 
             return new AuthUserDto
             {
-                AccessToken = tokens.AccessToken,
-                RefreshToken = tokens.RefreshToken,
+                AccessToken = AccessToken,
+                RefreshToken = RefreshToken,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email
+                }
+            };
+        }
+
+        public async Task<AuthUserDto> RefreshUserAsync(string refreshToken)
+        {
+            UserDto userDto = _tokenService.ValidateRefresh(refreshToken);
+
+            User? user = await _userRepository.FindAsync(userDto.Id)
+                ?? throw new Exception($"User with email {userDto.Email} doesn't exist.");
+
+            var (AccessToken, RefreshToken) = _tokenService.GenerateTokens(user);
+
+            return new AuthUserDto
+            {
+                AccessToken = AccessToken,
+                RefreshToken = RefreshToken,
                 User = new UserDto
                 {
                     Id = user.Id,
